@@ -42,6 +42,24 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<Null> _refreshList() async {
+    await Future.delayed(Duration(milliseconds: 500));
+
+    setState(() {
+      _todoList.sort((a, b) {
+        if (a["done"] && !b["done"]) {
+          return 1;
+        } else if(!a["done"] && b["done"]) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+
+      _saveData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,10 +93,13 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(top: 10.0),
-              itemCount: _todoList.length,
-              itemBuilder: buildItem
+            child: RefreshIndicator(
+              onRefresh: _refreshList,
+              child: ListView.builder(
+                padding: EdgeInsets.only(top: 10.0),
+                itemCount: _todoList.length,
+                itemBuilder: buildItem
+              ),
             )
           )
         ],
@@ -106,12 +127,15 @@ class _HomeState extends State<Home> {
               setState(() {
                 _todoList.insert(_lastRemovedIndex, _lastRemoved);
                 _saveData();
+
+                Scaffold.of(context).removeCurrentSnackBar();
               });
             },
           ),
           duration: Duration(seconds: 2),
         );
 
+        Scaffold.of(context).removeCurrentSnackBar();
         Scaffold.of(context).showSnackBar(snack);
       },
       background: Container(
