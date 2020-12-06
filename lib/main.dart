@@ -75,23 +75,7 @@ class _HomeState extends State<Home> {
             child: ListView.builder(
               padding: EdgeInsets.only(top: 10.0),
               itemCount: _todoList.length,
-              itemBuilder: (context, index) {
-                return CheckboxListTile(
-                  title: Text(_todoList[index]["title"]),
-                  value: _todoList[index]["done"],
-                  secondary: CircleAvatar(
-                    child: Icon(
-                      _todoList[index]["done"] ? Icons.check : Icons.error
-                    )
-                  ),
-                  onChanged: (checked) {
-                    setState(() {
-                      _todoList[index]["done"] = checked;
-                      _saveData();
-                    });
-                  },
-                );
-              }
+              itemBuilder: buildItem
             )
           )
         ],
@@ -99,6 +83,34 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget buildItem (context, index) {
+    return Dismissible(
+      background: Container(
+        color: Colors.red,
+        child: Align(
+          alignment: Alignment(-0.9, 0.0),
+          child: Icon(Icons.delete, color: Colors.white,),
+        ),
+      ),
+      direction: DismissDirection.startToEnd,
+      key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
+      child: CheckboxListTile(
+        title: Text(_todoList[index]["title"]),
+        value: _todoList[index]["done"],
+        secondary: CircleAvatar(
+          child: Icon(
+            _todoList[index]["done"] ? Icons.check : Icons.error
+          )
+        ),
+        onChanged: (checked) {
+          setState(() {
+            _todoList[index]["done"] = checked;
+            _saveData();
+          });
+        },
+      )
+    );
+  }
 
   Future<File> _getFile() async {
     // path_provider brings path
