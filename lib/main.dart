@@ -19,6 +19,9 @@ class _HomeState extends State<Home> {
   List _todoList = [];
   final _newTaskInput = TextEditingController();
 
+  Map<String, dynamic> _lastRemoved;
+  int _lastRemovedIndex;
+
   @override
   void initState() {
     super.initState();
@@ -85,6 +88,32 @@ class _HomeState extends State<Home> {
 
   Widget buildItem (context, index) {
     return Dismissible(
+      onDismissed: (direction) {
+        _lastRemoved = Map.from(_todoList[index]);
+        _lastRemovedIndex = index;
+
+        setState(() {
+          _todoList.removeAt(index);
+        });
+
+        _saveData();
+
+        final snack = SnackBar(
+          content: Text("Task \"${_lastRemoved["title"]}\" removed!"),
+          action: SnackBarAction(
+            label: "Undo",
+            onPressed: () {
+              setState(() {
+                _todoList.insert(_lastRemovedIndex, _lastRemoved);
+                _saveData();
+              });
+            },
+          ),
+          duration: Duration(seconds: 2),
+        );
+
+        Scaffold.of(context).showSnackBar(snack);
+      },
       background: Container(
         color: Colors.red,
         child: Align(
